@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Expense Manager MVP</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="brand-panel" aria-label="Tong quan san pham">
+        <div class="brand-mark">₫</div>
+        <h1>Expense Manager</h1>
+        <p>Ghi thu chi nhanh, xem lai giao dich theo thang va giu du lieu tach rieng theo tai khoan.</p>
+      </section>
+
+      <section class="auth-panel" aria-label="Dang nhap">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-mode="login" type="button">Dang nhap</button>
+          <button class="tab" data-mode="register" type="button">Dang ky</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <label class="field name-field hidden">
+            <span>Ten hien thi</span>
+            <input id="name" autocomplete="name" placeholder="Nguyen Van A" />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input id="email" autocomplete="email" inputmode="email" placeholder="ban@example.com" required />
+          </label>
+
+          <label class="field">
+            <span>Mat khau</span>
+            <input id="password" autocomplete="current-password" minlength="8" type="password" required />
+          </label>
+
+          <button id="submitButton" class="primary-button" type="submit">Dang nhap</button>
+          <p id="formMessage" class="form-message" role="status"></p>
+        </form>
+
+        <div id="sessionPanel" class="session-panel hidden">
+          <p class="muted">Dang dang nhap voi tai khoan</p>
+          <strong id="sessionUser"></strong>
+          <button id="logoutButton" class="secondary-button" type="button">Dang xuat</button>
+        </div>
+      </section>
+
+      <section id="trackerApp" class="tracker-app hidden" aria-label="Quan li giao dich">
+        <header class="tracker-header">
+          <div>
+            <p class="eyebrow">So giao dich</p>
+            <h2>Thu chi trong thang</h2>
+          </div>
+          <label class="month-picker">
+            <span>Thang</span>
+            <input id="monthFilter" type="month" />
+          </label>
+        </header>
+
+        <nav class="section-nav" aria-label="Dieu huong noi dung">
+          <a href="#transactionsSection">Giao dich</a>
+          <a href="#dashboardSection">Tong quan</a>
+          <a href="#budgetSection">Ngan sach</a>
+          <a href="#recurringSection">Dinh ky</a>
+        </nav>
+
+        <section class="summary-grid" aria-label="Tom tat">
+          <article class="summary-item income">
+            <span>Thu nhap</span>
+            <strong id="incomeTotal">0 ₫</strong>
+          </article>
+          <article class="summary-item expense">
+            <span>Chi tieu</span>
+            <strong id="expenseTotal">0 ₫</strong>
+          </article>
+          <article class="summary-item balance">
+            <span>Con lai</span>
+            <strong id="balanceTotal">0 ₫</strong>
+          </article>
+          <article class="summary-item">
+            <span>Ty le tiet kiem</span>
+            <strong id="savingsRate">0%</strong>
+          </article>
+          <article class="summary-item">
+            <span>So giao dich</span>
+            <strong id="transactionCount">0</strong>
+          </article>
+          <article class="summary-item">
+            <span>Chi TB / giao dich</span>
+            <strong id="averageExpense">0 ₫</strong>
+          </article>
+        </section>
+
+        <section id="transactionsSection" class="tracker-layout">
+          <form id="transactionForm" class="transaction-form">
+            <input id="transactionId" type="hidden" />
+            <div class="panel-heading">
+              <h3>Nhap nhanh</h3>
+              <span>Thu/chi hang ngay</span>
+            </div>
+
+            <div class="segmented" role="radiogroup" aria-label="Loai giao dich">
+              <label>
+                <input name="transactionType" type="radio" value="expense" checked />
+                <span>Chi</span>
+              </label>
+              <label>
+                <input name="transactionType" type="radio" value="income" />
+                <span>Thu</span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>So tien</span>
+              <input id="amount" inputmode="decimal" min="1" placeholder="150000" required type="number" />
+            </label>
+
+            <label class="field">
+              <span>Danh muc</span>
+              <select id="category" required></select>
+            </label>
+
+            <label class="field">
+              <span>Vi</span>
+              <select id="wallet" required></select>
+            </label>
+
+            <label class="field">
+              <span>Ngay</span>
+              <input id="transactionDate" required type="date" />
+            </label>
+
+            <label class="field">
+              <span>Ghi chu</span>
+              <input id="note" maxlength="160" placeholder="Ca phe sang" />
+            </label>
+
+            <div class="form-actions">
+              <button id="saveTransactionButton" class="primary-button" type="submit">Luu giao dich</button>
+              <button id="cancelEditButton" class="secondary-button compact hidden" type="button">Huy sua</button>
+            </div>
+            <p id="transactionMessage" class="form-message" role="status"></p>
+          </form>
+
+          <section class="transaction-list-panel">
+            <div class="list-toolbar">
+              <h3>Giao dich</h3>
+              <button id="refreshButton" class="ghost-button" type="button">Tai lai</button>
+            </div>
+            <div id="transactionList" class="transaction-list"></div>
+          </section>
+        </section>
+
+        <section id="dashboardSection" class="dashboard-grid" aria-label="Dashboard">
+          <article class="dashboard-panel">
+            <div class="list-toolbar">
+              <h3>Chi tieu theo danh muc</h3>
+              <span id="topCategoryLabel" class="toolbar-meta">Chua co du lieu</span>
+            </div>
+            <div id="categoryBreakdown" class="category-breakdown"></div>
+          </article>
+
+          <article class="dashboard-panel">
+            <h3>Insight thang</h3>
+            <p id="monthInsight" class="insight-text">Chua co du lieu chi tieu trong thang nay.</p>
+            <div id="topCategories" class="top-categories"></div>
+          </article>
+        </section>
+
+        <section id="budgetSection" class="budget-grid" aria-label="Ngan sach">
+          <form id="budgetForm" class="budget-form dashboard-panel">
+            <input id="budgetId" type="hidden" />
+            <div class="panel-heading">
+              <h3>Ngan sach thang</h3>
+              <span>Dat gioi han theo danh muc</span>
+            </div>
+
+            <label class="field">
+              <span>Danh muc chi</span>
+              <select id="budgetCategory" required></select>
+            </label>
+
+            <label class="field">
+              <span>Han muc</span>
+              <input id="budgetLimit" inputmode="decimal" min="1" placeholder="2000000" required type="number" />
+            </label>
+
+            <div class="form-actions">
+              <button id="saveBudgetButton" class="primary-button" type="submit">Luu ngan sach</button>
+              <button id="cancelBudgetEditButton" class="secondary-button compact hidden" type="button">Huy sua</button>
+            </div>
+            <p id="budgetMessage" class="form-message" role="status"></p>
+          </form>
+
+          <section class="dashboard-panel">
+            <div class="list-toolbar">
+              <h3>Tien do ngan sach</h3>
+              <span id="budgetSummaryLabel" class="toolbar-meta">0 ngan sach</span>
+            </div>
+            <div id="budgetList" class="budget-list"></div>
+          </section>
+        </section>
+
+        <section id="recurringSection" class="recurring-grid" aria-label="Giao dich dinh ky">
+          <form id="recurringForm" class="recurring-form dashboard-panel">
+            <input id="recurringId" type="hidden" />
+            <div class="panel-heading">
+              <h3>Khoan dinh ky</h3>
+              <span>Tu dong tao giao dich den han</span>
+            </div>
+
+            <div class="segmented" role="radiogroup" aria-label="Loai dinh ky">
+              <label>
+                <input name="recurringType" type="radio" value="expense" checked />
+                <span>Chi</span>
+              </label>
+              <label>
+                <input name="recurringType" type="radio" value="income" />
+                <span>Thu</span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>So tien</span>
+              <input id="recurringAmount" inputmode="decimal" min="1" placeholder="3000000" required type="number" />
+            </label>
+
+            <label class="field">
+              <span>Danh muc</span>
+              <select id="recurringCategory" required></select>
+            </label>
+
+            <label class="field">
+              <span>Vi</span>
+              <select id="recurringWallet" required></select>
+            </label>
+
+            <label class="field">
+              <span>Tan suat</span>
+              <select id="recurringFrequency" required>
+                <option value="monthly">Hang thang</option>
+                <option value="weekly">Hang tuan</option>
+                <option value="daily">Hang ngay</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Thoi diem chay tiep theo</span>
+              <input id="recurringNextRunDate" required type="datetime-local" />
+            </label>
+
+            <label class="field">
+              <span>Ghi chu</span>
+              <input id="recurringNote" maxlength="160" placeholder="Tien nha, luong, subscription" />
+            </label>
+
+            <div class="form-actions">
+              <button id="saveRecurringButton" class="primary-button" type="submit">Luu dinh ky</button>
+              <button id="cancelRecurringEditButton" class="secondary-button compact hidden" type="button">Huy sua</button>
+            </div>
+            <p id="recurringMessage" class="form-message" role="status"></p>
+          </form>
+
+          <section class="dashboard-panel">
+            <div class="list-toolbar">
+              <h3>Danh sach dinh ky</h3>
+              <span id="recurringSummaryLabel" class="toolbar-meta">0 khoan</span>
+            </div>
+            <div id="recurringList" class="recurring-list"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
