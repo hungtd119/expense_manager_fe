@@ -4,5 +4,3 @@ services:
       context: .
     ports:
       - "8081:80"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
