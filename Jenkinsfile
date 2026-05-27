@@ -15,13 +15,10 @@ pipeline {
     DOCKER_REPOSITORY = 'hungtd1192002/expanse_manager_fe'
     DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
     SSH_CREDENTIALS_ID = 'aws-ec2-ssh-key'
-    DEPLOY_HOST = '13.212.161.182'
+    DEPLOY_HOST = '172.31.13.233'
     CONTAINER_NAME = 'expense-manager-frontend'
     HOST_PORT = '8081'
     CONTAINER_PORT = '80'
-    IMAGE_TAG = ''
-    DOCKER_IMAGE = ''
-    DOCKER_IMAGE_LATEST = ''
   }
 
   stages {
@@ -35,9 +32,6 @@ pipeline {
       steps {
         script {
           env.FRONTEND_DIR = fileExists('frontend/package.json') ? 'frontend' : '.'
-          env.IMAGE_TAG = env.BUILD_NUMBER
-          env.DOCKER_IMAGE = "${env.DOCKER_REGISTRY}/${env.DOCKER_REPOSITORY}:${env.IMAGE_TAG}"
-          env.DOCKER_IMAGE_LATEST = "${env.DOCKER_REGISTRY}/${env.DOCKER_REPOSITORY}:latest"
         }
       }
     }
@@ -87,9 +81,12 @@ pipeline {
       steps {
         dir(env.FRONTEND_DIR) {
           sh '''
+            IMAGE="$DOCKER_REGISTRY/$DOCKER_REPOSITORY:$BUILD_NUMBER"
+            IMAGE_LATEST="$DOCKER_REGISTRY/$DOCKER_REPOSITORY:latest"
+
             docker build \
-              -t "$DOCKER_IMAGE" \
-              -t "$DOCKER_IMAGE_LATEST" \
+              -t "$IMAGE" \
+              -t "$IMAGE_LATEST" \
               .
           '''
         }
@@ -104,9 +101,12 @@ pipeline {
           passwordVariable: 'DOCKER_PASSWORD'
         )]) {
           sh '''
+            IMAGE="$DOCKER_REGISTRY/$DOCKER_REPOSITORY:$BUILD_NUMBER"
+            IMAGE_LATEST="$DOCKER_REGISTRY/$DOCKER_REPOSITORY:latest"
+
             echo "$DOCKER_PASSWORD" | docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin
-            docker push "$DOCKER_IMAGE"
-            docker push "$DOCKER_IMAGE_LATEST"
+            docker push "$IMAGE"
+            docker push "$IMAGE_LATEST"
             docker logout "$DOCKER_REGISTRY"
           '''
         }
@@ -128,18 +128,20 @@ pipeline {
           )
         ]) {
           sh '''
+            IMAGE="$DOCKER_REGISTRY/$DOCKER_REPOSITORY:$BUILD_NUMBER"
+
             printf '%s' "$DOCKER_PASSWORD" | ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "$SSH_USER@$DEPLOY_HOST" "docker login '$DOCKER_REGISTRY' -u '$DOCKER_USERNAME' --password-stdin"
 
             ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "$SSH_USER@$DEPLOY_HOST" "
               set -e
-              docker pull '$DOCKER_IMAGE'
+              docker pull '$IMAGE'
               docker stop '$CONTAINER_NAME' || true
               docker rm '$CONTAINER_NAME' || true
               docker run -d \
                 --name '$CONTAINER_NAME' \
                 --restart unless-stopped \
                 -p '$HOST_PORT':'$CONTAINER_PORT' \
-                '$DOCKER_IMAGE'
+                '$IMAGE'
               docker image prune -f
               docker logout '$DOCKER_REGISTRY'
             "
