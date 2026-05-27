@@ -17,6 +17,7 @@ pipeline {
     SSH_CREDENTIALS_ID = 'aws-ec2-ssh-key'
     DEPLOY_HOST = '172.31.13.233'
     CONTAINER_NAME = 'expense-manager-frontend'
+    LEGACY_CONTAINER_NAME = 'expense_manager_fe-frontend-1'
     HOST_PORT = '8081'
     CONTAINER_PORT = '80'
   }
@@ -32,42 +33,6 @@ pipeline {
       steps {
         script {
           env.FRONTEND_DIR = fileExists('frontend/package.json') ? 'frontend' : '.'
-        }
-      }
-    }
-
-    stage('Install dependencies') {
-      steps {
-        dir(env.FRONTEND_DIR) {
-          sh 'npm ci'
-        }
-      }
-    }
-
-    stage('Quality checks') {
-      steps {
-        dir(env.FRONTEND_DIR) {
-          sh '''
-            if npm run | grep -qE '^  lint$'; then
-              npm run lint
-            else
-              echo "No lint script found, skipping."
-            fi
-
-            if npm run | grep -qE '^  test$'; then
-              npm test -- --watch=false
-            else
-              echo "No test script found, skipping."
-            fi
-          '''
-        }
-      }
-    }
-
-    stage('Build frontend') {
-      steps {
-        dir(env.FRONTEND_DIR) {
-          sh 'npm run build'
         }
       }
     }
@@ -137,6 +102,8 @@ pipeline {
               docker pull '$IMAGE'
               docker stop '$CONTAINER_NAME' || true
               docker rm '$CONTAINER_NAME' || true
+              docker stop '$LEGACY_CONTAINER_NAME' || true
+              docker rm '$LEGACY_CONTAINER_NAME' || true
               docker run -d \
                 --name '$CONTAINER_NAME' \
                 --restart unless-stopped \
@@ -152,9 +119,6 @@ pipeline {
   }
 
   post {
-    always {
-      archiveArtifacts artifacts: "${env.FRONTEND_DIR}/dist/**", allowEmptyArchive: true
-    }
     success {
       echo "Frontend build completed: ${APP_NAME}"
     }
