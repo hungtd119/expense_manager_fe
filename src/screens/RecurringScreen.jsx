@@ -4,6 +4,7 @@ import { currentDateTimeLocal } from '../utils/formatters';
 import SegmentedType from '../components/SegmentedType';
 import Message from '../components/Message';
 import RecurringItem from '../components/RecurringItem';
+import AppSelect from '../components/AppSelect';
 
 export default function RecurringScreen({ categories, wallets, recurringTransactions, reload, setToast }) {
   const emptyForm = {
@@ -73,9 +74,39 @@ export default function RecurringScreen({ categories, wallets, recurringTransact
         <div className="panel-heading"><h3>{form.id ? 'Sua khoan dinh ky' : 'Khoan dinh ky'}</h3><span>Tu dong tao giao dich den han</span></div>
         <SegmentedType name="recurringType" value={form.type} onChange={(type) => setForm({ ...form, type, categoryId: '' })} />
         <label className="field"><span>So tien</span><input inputMode="decimal" min="1" onChange={(event) => setForm({ ...form, amount: event.target.value })} placeholder="500000" required type="number" value={form.amount} /></label>
-        <label className="field"><span>Danh muc</span><select onChange={(event) => setForm({ ...form, categoryId: event.target.value })} required value={selectedCategory}>{categoryOptions.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-        <label className="field"><span>Vi</span><select onChange={(event) => setForm({ ...form, walletId: event.target.value })} required value={selectedWallet}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} ({wallet.currency})</option>)}</select></label>
-        <label className="field"><span>Tan suat</span><select onChange={(event) => setForm({ ...form, frequency: event.target.value })} value={form.frequency}><option value="daily">Hang ngay</option><option value="weekly">Hang tuan</option><option value="monthly">Hang thang</option></select></label>
+        <label className="field">
+          <span>Danh muc</span>
+          <AppSelect
+            options={categoryOptions.map((c) => ({ value: c.id, label: c.name, icon: c.icon, color: c.color }))}
+            onChange={(val) => setForm({ ...form, categoryId: val })}
+            value={selectedCategory}
+            required
+            placeholder="Chon danh muc..."
+          />
+        </label>
+        <label className="field">
+          <span>Vi</span>
+          <AppSelect
+            options={wallets.map((w) => ({ value: w.id, label: `${w.name} (${w.currency})` }))}
+            onChange={(val) => setForm({ ...form, walletId: val })}
+            value={selectedWallet}
+            required
+            placeholder="Chon vi..."
+          />
+        </label>
+        <label className="field">
+          <span>Tan suat</span>
+          <AppSelect
+            options={[
+              { value: 'daily', label: 'Hang ngay' },
+              { value: 'weekly', label: 'Hang tuan' },
+              { value: 'monthly', label: 'Hang thang' }
+            ]}
+            onChange={(val) => setForm({ ...form, frequency: val })}
+            value={form.frequency}
+            searchable={false}
+          />
+        </label>
         <label className="field"><span>Lan chay tiep</span><input onChange={(event) => setForm({ ...form, nextRunAt: event.target.value })} required type="datetime-local" value={form.nextRunAt} /></label>
         <label className="field"><span>Ghi chu</span><input maxLength="160" onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="Tien nha" value={form.note} /></label>
         <div className="form-actions"><button className="primary-button" type="submit">{form.id ? 'Cap nhat dinh ky' : 'Luu dinh ky'}</button>{form.id ? <button className="secondary-button compact" onClick={() => setForm(emptyForm)} type="button">Huy sua</button> : null}</div>

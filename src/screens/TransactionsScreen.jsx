@@ -4,6 +4,7 @@ import { todayDate } from '../utils/formatters';
 import SegmentedType from '../components/SegmentedType';
 import Message from '../components/Message';
 import TransactionItem from '../components/TransactionItem';
+import AppSelect from '../components/AppSelect';
 
 export default function TransactionsScreen({ 
   categories, 
@@ -182,8 +183,26 @@ export default function TransactionsScreen({
         </div>
         <SegmentedType name="transactionType" value={form.type} onChange={(type) => setForm({ ...form, type, categoryId: '' })} />
         <label className="field"><span>Số tiền</span><input inputMode="decimal" min="1" onChange={(event) => setForm({ ...form, amount: event.target.value })} placeholder="150000" required type="number" value={form.amount} /></label>
-        <label className="field"><span>Danh mục</span><select onChange={(event) => setForm({ ...form, categoryId: event.target.value })} required value={selectedCategory}>{categoryOptions.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-        <label className="field"><span>Ví</span><select onChange={(event) => setForm({ ...form, walletId: event.target.value })} required value={selectedWallet}>{wallets.map((wallet) => <option key={wallet.id} value={wallet.id}>{wallet.name} ({wallet.currency})</option>)}</select></label>
+        <label className="field">
+          <span>Danh mục</span>
+          <AppSelect
+            options={categoryOptions.map((c) => ({ value: c.id, label: c.name, icon: c.icon, color: c.color }))}
+            onChange={(val) => setForm({ ...form, categoryId: val })}
+            value={selectedCategory}
+            required
+            placeholder="Chọn danh mục..."
+          />
+        </label>
+        <label className="field">
+          <span>Ví</span>
+          <AppSelect
+            options={wallets.map((w) => ({ value: w.id, label: `${w.name} (${w.currency})` }))}
+            onChange={(val) => setForm({ ...form, walletId: val })}
+            value={selectedWallet}
+            required
+            placeholder="Chọn ví..."
+          />
+        </label>
         <label className="field"><span>Ngày</span><input onChange={(event) => setForm({ ...form, transactionDate: event.target.value })} required type="date" value={form.transactionDate} /></label>
         <label className="field"><span>Ghi chú</span><input maxLength="160" onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="Cà phê sáng" value={form.note} /></label>
         <div className="form-actions">
@@ -211,42 +230,47 @@ export default function TransactionsScreen({
           padding: '12px', 
           borderRadius: '8px'
         }}>
-          <select 
-            value={filters?.type || ''} 
-            onChange={(e) => handleFilterChange('type', e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
-          >
-            <option value="">Tất cả loại</option>
-            <option value="income">Thu nhập</option>
-            <option value="expense">Chi tiêu</option>
-          </select>
+          <AppSelect
+            clearable
+            options={[
+              { value: '', label: 'Tất cả loại' },
+              { value: 'income', label: 'Thu nhập' },
+              { value: 'expense', label: 'Chi tiêu' }
+            ]}
+            onChange={(val) => handleFilterChange('type', val)}
+            placeholder="Tất cả loại"
+            value={filters?.type || ''}
+          />
 
-          <select 
-            value={filters?.walletId || ''} 
-            onChange={(e) => handleFilterChange('walletId', e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
-          >
-            <option value="">Tất cả ví</option>
-            {wallets.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-          </select>
+          <AppSelect
+            clearable
+            options={[
+              { value: '', label: 'Tất cả ví' },
+              ...wallets.map((w) => ({ value: w.id, label: w.name }))
+            ]}
+            onChange={(val) => handleFilterChange('walletId', val)}
+            placeholder="Tất cả ví"
+            value={filters?.walletId || ''}
+          />
 
-          <select 
-            value={filters?.categoryId || ''} 
-            onChange={(e) => handleFilterChange('categoryId', e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
-          >
-            <option value="">Tất cả danh mục</option>
-            {categories
-              .filter(c => !(filters?.type) || c.type === filters.type)
-              .map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <AppSelect
+            clearable
+            options={[
+              { value: '', label: 'Tất cả danh mục' },
+              ...categories
+                .filter((c) => !(filters?.type) || c.type === filters.type)
+                .map((c) => ({ value: c.id, label: c.name, icon: c.icon, color: c.color }))
+            ]}
+            onChange={(val) => handleFilterChange('categoryId', val)}
+            placeholder="Tất cả danh mục"
+            value={filters?.categoryId || ''}
+          />
 
           <input 
             type="text" 
             placeholder="Tìm ghi chú..." 
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
           />
 
           <input 
@@ -254,7 +278,6 @@ export default function TransactionsScreen({
             placeholder="Min VND..." 
             value={localMin}
             onChange={(e) => setLocalMin(e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
           />
 
           <input 
@@ -262,7 +285,6 @@ export default function TransactionsScreen({
             placeholder="Max VND..." 
             value={localMax}
             onChange={(e) => setLocalMax(e.target.value)}
-            style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)' }}
           />
 
           <div style={{ display: 'flex', gap: '8px', gridColumn: '1 / -1', justifyContent: 'flex-end', marginTop: '4px' }}>

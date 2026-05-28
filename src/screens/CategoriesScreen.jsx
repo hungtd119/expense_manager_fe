@@ -149,22 +149,12 @@ export default function CategoriesScreen({ categories, reload, setToast }) {
               <article className="transaction-item" key={category.id}>
                 <div className="transaction-main">
                   <span
-                    className="category-dot"
-                    style={{
-                      background: category.color || '#657084',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      color: '#fff',
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '50%'
-                    }}
+                    className="category-icon-badge"
+                    style={{ background: category.color || '#657084' }}
                   >
                     {category.icon || '🍔'}
                   </span>
-                  <div style={{ marginLeft: '12px' }}>
+                  <div className="category-item-info">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <strong>{category.name}</strong>
                       {category.isDefault ? (

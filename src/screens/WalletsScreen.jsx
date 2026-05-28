@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createWallet, updateWallet, deleteWallet } from '../api/reference';
 import Message from '../components/Message';
+import AppSelect from '../components/AppSelect';
 
 export default function WalletsScreen({ wallets, reload, setToast }) {
   const emptyForm = { id: '', name: '', currency: 'VND', balanceInitial: '' };
@@ -78,15 +79,17 @@ export default function WalletsScreen({ wallets, reload, setToast }) {
         </label>
         <label className="field">
           <span>Loai tien te</span>
-          <select
-            onChange={(event) => setForm({ ...form, currency: event.target.value })}
-            required
+          <AppSelect
+            options={[
+              { value: 'VND', label: 'VND (₫)' },
+              { value: 'USD', label: 'USD ($)' },
+              { value: 'EUR', label: 'EUR (€)' }
+            ]}
+            onChange={(val) => setForm({ ...form, currency: val })}
             value={form.currency}
-          >
-            <option value="VND">VND (₫)</option>
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-          </select>
+            required
+            searchable={false}
+          />
         </label>
         <label className="field">
           <span>So du ban dau</span>
