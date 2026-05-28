@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createBudget, updateBudget, deleteBudget } from '../api/budgets';
 import Message from '../components/Message';
 import BudgetItem from '../components/BudgetItem';
+import AppSelect from '../components/AppSelect';
 
 export default function BudgetsScreen({ categories, budgets, month, reload }) {
   const emptyForm = { id: '', categoryId: '', amountLimit: '' };
@@ -46,7 +47,16 @@ export default function BudgetsScreen({ categories, budgets, month, reload }) {
     <section className="budget-grid">
       <form className="budget-form dashboard-panel" onSubmit={submit}>
         <div className="panel-heading"><h3>{form.id ? 'Sua ngan sach' : 'Ngan sach thang'}</h3><span>Dat gioi han theo danh muc</span></div>
-        <label className="field"><span>Danh muc chi</span><select onChange={(event) => setForm({ ...form, categoryId: event.target.value })} required value={selectedCategory}>{expenseCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+        <label className="field">
+          <span>Danh muc chi</span>
+          <AppSelect
+            options={expenseCategories.map((c) => ({ value: c.id, label: c.name, icon: c.icon, color: c.color }))}
+            onChange={(val) => setForm({ ...form, categoryId: val })}
+            value={selectedCategory}
+            required
+            placeholder="Chon danh muc chi..."
+          />
+        </label>
         <label className="field"><span>Han muc</span><input inputMode="decimal" min="1" onChange={(event) => setForm({ ...form, amountLimit: event.target.value })} placeholder="2000000" required type="number" value={form.amountLimit} /></label>
         <div className="form-actions">
           <button className="primary-button" type="submit">{form.id ? 'Cap nhat ngan sach' : 'Luu ngan sach'}</button>

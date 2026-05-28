@@ -132,30 +132,37 @@ h1 {
   font-weight: 700;
 }
 
-.field input {
-  width: 100%;
-  min-height: 46px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: var(--surface);
-  color: var(--text);
-}
-
+.field input,
 .field select {
   width: 100%;
-  min-height: 46px;
+  min-height: 42px;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0 12px;
   background: var(--surface);
   color: var(--text);
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+/* color type special: fixed height so it shows correctly */
+.field input[type="color"] {
+  padding: 4px 8px;
+  min-height: 42px;
+  cursor: pointer;
+  border-radius: 8px;
 }
 
 .field input:focus,
 .field select:focus {
   border-color: var(--primary);
-  outline: 3px solid rgba(20, 108, 96, 0.14);
+  box-shadow: 0 0 0 3px rgba(20, 108, 96, 0.12);
+}
+
+.field input:hover:not(:focus),
+.field select:hover:not(:focus) {
+  border-color: var(--primary);
 }
 
 .primary-button,
@@ -496,6 +503,26 @@ h3 {
   height: 12px;
   margin-top: 5px;
   border-radius: 999px;
+}
+
+/* Emoji icon badge for category list items */
+.category-icon-badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.category-item-info {
+  margin-left: 10px;
+  min-width: 0;
 }
 
 .transaction-main p {
