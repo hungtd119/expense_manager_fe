@@ -4,3 +4,7 @@ services:
       context: .
     ports:
       - "8081:80"
+    environment:
+      - BACKEND_URL=http://host.docker.internal:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
