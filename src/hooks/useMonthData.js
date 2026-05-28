@@ -17,6 +17,7 @@ export default function useMonthData() {
   const [recurringTransactions, setRecurringTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
+  const [filters, setFilters] = useState({ type: '', categoryId: '', walletId: '', q: '', minAmount: '', maxAmount: '' });
 
   const loadReferenceData = useCallback(async () => {
     try {
@@ -31,7 +32,7 @@ export default function useMonthData() {
     }
   }, []);
 
-  const loadMonthData = useCallback(async (nextMonth = month, page = 1, pageSize = 50) => {
+  const loadMonthData = useCallback(async (nextMonth = month, page = 1, pageSize = 50, activeFilters = filters) => {
     setLoading(true);
     try {
       const recurringData = await listRecurringTransactions();
@@ -41,7 +42,7 @@ export default function useMonthData() {
       }
 
       const [transactionData, dashboardData, budgetData] = await Promise.all([
-        listTransactions(nextMonth, page, pageSize),
+        listTransactions(nextMonth, page, pageSize, activeFilters),
         getDashboard(nextMonth),
         listBudgets(nextMonth)
       ]);
@@ -54,7 +55,7 @@ export default function useMonthData() {
     } finally {
       setLoading(false);
     }
-  }, [month]);
+  }, [month, filters]);
 
   const clearData = useCallback(() => {
     setTransactions([]);
@@ -62,6 +63,7 @@ export default function useMonthData() {
     setDashboard(null);
     setBudgets([]);
     setRecurringTransactions([]);
+    setFilters({ type: '', categoryId: '', walletId: '', q: '', minAmount: '', maxAmount: '' });
   }, []);
 
   return {
@@ -77,6 +79,8 @@ export default function useMonthData() {
     loading,
     toast,
     setToast,
+    filters,
+    setFilters,
     loadReferenceData,
     loadMonthData,
     clearData

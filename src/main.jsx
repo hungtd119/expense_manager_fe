@@ -51,6 +51,8 @@ function App() {
     loading,
     toast,
     setToast,
+    filters,
+    setFilters,
     loadReferenceData,
     loadMonthData,
     clearData
@@ -59,7 +61,7 @@ function App() {
   useEffect(() => {
     if (user) {
       loadReferenceData();
-      loadMonthData(month);
+      loadMonthData(month, 1, 50, filters);
     }
   }, [user, month, loadReferenceData, loadMonthData]);
 
@@ -99,9 +101,11 @@ function App() {
     recurringTransactions,
     month,
     loading,
-    reload: async (page = 1, pageSize = 50) => {
+    filters,
+    setFilters,
+    reload: async (page = 1, pageSize = 50, nextFilters = filters) => {
       await loadReferenceData();
-      await loadMonthData(month, page, pageSize);
+      await loadMonthData(month, page, pageSize, nextFilters);
     },
     setToast
   };
